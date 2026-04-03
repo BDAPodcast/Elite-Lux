@@ -1,14 +1,20 @@
 import React, { useState } from 'react';
-import { Outlet, Link, useLocation } from 'react-router-dom';
+import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { Menu, X, Globe } from 'lucide-react';
+import { supabase } from '../lib/supabase';
 import Logo from './Logo';
 import './Layout.css';
 
-export default function Layout() {
+export default function Layout({ session }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
 
   const closeMenu = () => setMobileMenuOpen(false);
+
+  const handleSignOut = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) console.error('Error signing out:', error.message);
+  };
 
   return (
     <div className="app-container">
@@ -26,8 +32,20 @@ export default function Layout() {
           </div>
 
           <div className="header-right desktop-nav-links">
-            <Link to="/login" className="nav-item">Log In</Link>
-            <Link to="/login" className="btn-signup btn-gold">Sign Up</Link>
+            {session ? (
+              <button 
+                className="nav-item" 
+                style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-white)' }}
+                onClick={handleSignOut}
+              >
+                Sign Out
+              </button>
+            ) : (
+              <>
+                <Link to="/login" className="nav-item">Log In</Link>
+                <Link to="/login" className="btn-signup btn-gold">Sign Up</Link>
+              </>
+            )}
           </div>
 
           <button className="mobile-toggle" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>

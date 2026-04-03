@@ -1,18 +1,43 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '../lib/supabase';
 import './Login.css';
 
 export default function Login() {
+  const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
   const navigate = useNavigate();
 
-  const handleLogin = (e) => {
+  const handleAuth = async (e) => {
     e.preventDefault();
-    console.log("Logging in with", email);
-    // Simulate login & redirect to dashboard
-    navigate('/dashboard');
+    setLoading(true);
+    setError(null);
+
+    try {
+      if (isSignUp) {
+        const { error: signUpError } = await supabase.auth.signUp({
+          email,
+          password,
+        });
+        if (signUpError) throw signUpError;
+        alert('Verification email sent! Please check your inbox.');
+      } else {
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+        if (signInError) throw signInError;
+        navigate('/dashboard');
+      }
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -23,23 +48,23 @@ export default function Login() {
       exit={{ opacity: 0 }}
       transition={{ duration: 0.6 }}
     >
-      {/* Background full screen droplet image */}
       <img src="/bg-wet-window.png" alt="Wet Window" className="login-bg" />
 
-      {/* The main center modal */}
       <motion.div 
         className="login-modal"
         initial={{ y: 30, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.2, duration: 0.6, type: "spring", stiffness: 70 }}
       >
-        
-        {/* Left Side: White Area with Slanted Edge */}
         <div className="login-left">
           <div className="login-left-content">
-            <h1 className="login-title">Welcome back</h1>
+            <h1 className="login-title">
+              {isSignUp ? 'Create Account' : 'Welcome back'}
+            </h1>
             
-            <form onSubmit={handleLogin} className="login-form">
+            {error && <div className="auth-error">{error}</div>}
+
+            <form onSubmit={handleAuth} className="login-form">
               <div className="input-group">
                 <label>Email</label>
                 <input 
@@ -62,29 +87,37 @@ export default function Login() {
                 />
               </div>
               
-              <div className="forgot-password">
-                <a href="#reset">Forgot Password?</a>
-              </div>
+              {!isSignUp && (
+                <div className="forgot-password">
+                  <a href="#reset">Forgot Password?</a>
+                </div>
+              )}
 
-              <button type="submit" className="login-btn">
-                LOGIN
+              <button type="submit" className="login-btn" disabled={loading}>
+                {loading ? 'PROCESSING...' : (isSignUp ? 'SIGN UP' : 'LOGIN')}
               </button>
             </form>
 
             <div className="signup-prompt">
-              Don't have an account? <a href="#signup">Sign Up</a>
+              {isSignUp ? 'Already have an account?' : "Don't have an account?"} 
+              <button 
+                type="button" 
+                className="toggle-auth-btn"
+                onClick={() => setIsSignUp(!isSignUp)}
+              >
+                {isSignUp ? 'Log In' : 'Sign Up'}
+              </button>
             </div>
           </div>
         </div>
 
-        {/* Right Side: Image background with straight edges (covered by the slanted left) */}
         <div className="login-right">
           <div className="login-right-image-container">
-               <img src="/bg-cartier-side.png" alt="Luxury Storefront" />
+             <img src="/bg-cartier-side.png" alt="Luxury Storefront" />
           </div>
         </div>
-
       </motion.div>
     </motion.div>
   );
 }
+
