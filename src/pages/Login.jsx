@@ -48,7 +48,7 @@ export default function Login() {
       exit={{ opacity: 0 }}
       transition={{ duration: 0.6 }}
     >
-      <img src="/bg-wet-window.png" alt="Wet Window" className="login-bg" />
+      <img src={`${import.meta.env.BASE_URL}bg-wet-window.png`} alt="Wet Window" className="login-bg" />
 
       <motion.div 
         className="login-modal"
@@ -113,7 +113,7 @@ export default function Login() {
 
         <div className="login-right">
           <div className="login-right-image-container">
-             <img src="/bg-cartier-side.png" alt="Luxury Storefront" />
+             <img src={`${import.meta.env.BASE_URL}bg-cartier-side.png`} alt="Luxury Storefront" />
           </div>
         </div>
       </motion.div>

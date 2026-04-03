@@ -175,7 +175,7 @@ export default function Landing() {
               </button>
             </div>
             <div className="service-visual">
-              <img src="/service-escalade-hr.png" alt="Medium Distance" />
+              <img src={`${import.meta.env.BASE_URL}service-escalade-hr.png`} alt="Medium Distance" />
             </div>
           </motion.div>
 
@@ -190,7 +190,7 @@ export default function Landing() {
             initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-100px" }} variants={fadeInUp}
           >
             <div className="service-visual">
-              <img src="/service-interior-hr.png" alt="Long Distance Travel" />
+              <img src={`${import.meta.env.BASE_URL}service-interior-hr.png`} alt="Long Distance Travel" />
             </div>
             <div className="service-text">
               <h2>Long Distance Excursions</h2>
@@ -219,7 +219,7 @@ export default function Landing() {
               </div>
             </div>
             <div className="service-visual">
-              <img src="/service-lyriq-hr.png" alt="Multi Location Travel" />
+              <img src={`${import.meta.env.BASE_URL}service-lyriq-hr.png`} alt="Multi Location Travel" />
             </div>
           </motion.div>
 
