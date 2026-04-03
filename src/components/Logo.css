@@ -1,0 +1,12 @@
+.logo-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logo-img {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  /* Removed the invert filter so it natively renders Black and Gold */
+}
