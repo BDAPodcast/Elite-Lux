@@ -1,5 +1,5 @@
-import React from 'react';
-import { motion } from 'framer-motion';
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { MapPin, Navigation, Clock, ShieldCheck, Star } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import PageTransition from '../components/PageTransition';
@@ -8,6 +8,17 @@ import './Landing.css';
 
 export default function Landing() {
   const navigate = useNavigate();
+  const [splineLoaded, setSplineLoaded] = useState(false);
+  const [shouldMountSpline, setShouldMountSpline] = useState(false);
+
+  // Performance Guard: Delay Spline mounting by 1.5s to ensure initial scroll is smooth
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShouldMountSpline(true);
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, []);
+
 
   const fadeInUp = {
     hidden: { opacity: 0, y: 40 },
@@ -70,11 +81,48 @@ export default function Landing() {
               transition={{ duration: 0.8, delay: 0.4 }}
             >
               <div className="hero-spline-wrapper">
+                {/* 
+                  Performance Optimization: 
+                  Show a high-quality "Snapshot" while the heavy 3D engine loads.
+                  This stops the "lagging" the user reported by preventing the 3D engine 
+                  from freezing the browser main thread during initial scroll.
+                */}
+                <AnimatePresence>
+                  {!splineLoaded && (
+                    <motion.div 
+                      key="poster"
+                      className="spline-poster"
+                      initial={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 1 }}
+                    >
+                      <img src={`${import.meta.env.BASE_URL}service-escalade-hr.png`} alt="Loading..." className="spline-placeholder" />
+                      <div className="spline-loader-overlay">
+                        <div className="gold-spinner"></div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
                 {/* Overlay to completely disable mouse interactions with Spline while keeping auto-animation */}
                 <div className="spline-interaction-blocker"></div>
-                <Spline scene="https://prod.spline.design/8YqOWfYEgdw8ZaXH/scene.splinecode" />
+                
+                {shouldMountSpline && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: splineLoaded ? 1 : 0 }}
+                    transition={{ duration: 1.5 }}
+                    style={{ height: '100%', width: '100%' }}
+                  >
+                    <Spline 
+                      scene="https://prod.spline.design/8YqOWfYEgdw8ZaXH/scene.splinecode" 
+                      onLoad={() => setSplineLoaded(true)}
+                    />
+                  </motion.div>
+                )}
               </div>
             </motion.div>
+
           </div>
         </section>
 

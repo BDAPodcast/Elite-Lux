@@ -113,7 +113,8 @@ export default function Login() {
 
         <div className="login-right">
           <div className="login-right-image-container">
-             <img src={`${import.meta.env.BASE_URL}bg-cartier-side.png`} alt="Luxury Storefront" />
+             <img src={`${import.meta.env.BASE_URL}escalade-login-dark.png`} alt="Luxury Escalade" />
+
           </div>
         </div>
       </motion.div>
