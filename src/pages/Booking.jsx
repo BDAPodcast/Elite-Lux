@@ -14,12 +14,12 @@ export default function Booking() {
   
   // Form State
   const [pickup, setPickup] = useState('JFK International Airport');
-  const [dropoff, setDropoff] = useState('The Plaza Hotel, Manhattan');
+  const [dropoff, setDropoff] = useState('');
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');
   const [serviceType, setServiceType] = useState('medium');
   const [seats, setSeats] = useState(2);
-  const [distance] = useState(24.5); // Simulated distance for now
+  const [distance, setDistance] = useState(0); // Updated live from Google Maps
 
   // Pricing Logic
   const getBasePrice = () => {
@@ -115,7 +115,11 @@ export default function Booking() {
           
           {/* Left Area: Map */}
           <div className="map-panel">
-            <MapSimulation pickup={pickup} dropoff={dropoff} />
+            <MapSimulation 
+              onPickupChange={setPickup} 
+              onDropoffChange={setDropoff}
+              onDistanceChange={setDistance}
+            />
           </div>
 
           {/* Right Area: Form */}
