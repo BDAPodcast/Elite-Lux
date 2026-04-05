@@ -16,15 +16,17 @@ function AnimatedRoutes({ session }) {
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
         <Route path="/" element={<Layout session={session} />}>
-          <Route index element={<Landing />} />
-          <Route path="login" element={!session ? <Login /> : <Navigate to="/dashboard" />} />
-          <Route path="booking" element={session ? <Booking /> : <Navigate to="/login" />} />
-          <Route path="dashboard" element={session ? <Dashboard /> : <Navigate to="/login" />} />
+          <Route index element={session ? <Navigate to="/dashboard" replace /> : <Landing />} />
+          <Route path="login" element={!session ? <Login /> : <Navigate to="/dashboard" replace />} />
+          <Route path="booking" element={session ? <Booking /> : <Navigate to="/login" replace />} />
+          <Route path="dashboard" element={session ? <Dashboard /> : <Navigate to="/login" replace />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
       </Routes>
     </AnimatePresence>
   );
 }
+
 
 function App() {
   const [appReady, setAppReady] = useState(false);

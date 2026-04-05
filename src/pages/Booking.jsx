@@ -1,147 +1,242 @@
 import React, { useState } from 'react';
-import { MapPin, Navigation, Calendar as CalendarIcon, CreditCard, ChevronRight } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { MapPin, Navigation, Calendar as CalendarIcon, CheckCircle } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { supabase } from '../lib/supabase';
 import PageTransition from '../components/PageTransition';
+import MapSimulation from '../components/MapSimulation';
 import './Booking.css';
 
 export default function Booking() {
-  const [step, setStep] = useState(1); // 1: Locations, 2: Vehicles, 3: Confirmation
-  const [selectedVehicle, setSelectedVehicle] = useState(null);
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const [bookingConfirmed, setBookingConfirmed] = useState(false);
+  
+  // Form State
+  const [pickup, setPickup] = useState('JFK International Airport');
+  const [dropoff, setDropoff] = useState('The Plaza Hotel, Manhattan');
+  const [date, setDate] = useState('');
+  const [time, setTime] = useState('');
+  const [serviceType, setServiceType] = useState('medium');
+  const [seats, setSeats] = useState(2);
+  const [distance] = useState(24.5); // Simulated distance for now
 
-  const vehicles = [
-    { id: 'sedan', name: 'Luxury Sedan', price: 150, capacity: '3 Pax', image: 'sedan' },
-    { id: 'suv', name: 'Executive SUV', price: 250, capacity: '6 Pax', image: 'suvs' },
-    { id: 'sprinter', name: 'Premium Sprinter', price: 400, capacity: '14 Pax', image: 'sprinter' }
-  ];
+  // Pricing Logic
+  const getBasePrice = () => {
+    switch(serviceType) {
+      case 'medium': return 200;
+      case 'long': return 550;
+      case 'multi': return 600;
+      default: return 200;
+    }
+  };
+
+  const getSeatModifier = () => {
+    switch(Number(seats)) {
+      case 2: return 0;
+      case 4: return 75;
+      case 6: return 150;
+      default: return 0;
+    }
+  };
+
+  const totalPrice = getBasePrice() + getSeatModifier() + (distance * 10);
+
+  const handleBooking = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('User not authenticated');
+
+      // 1. Create Booking Record
+      const { error: bookingError } = await supabase.from('bookings').insert({
+        user_id: user.id,
+        pickup_address: pickup,
+        dropoff_address: dropoff,
+        service_type: serviceType,
+        seats: seats,
+        pickup_date: date,
+        pickup_time: time,
+        distance_miles: distance,
+        base_price: getBasePrice(),
+        total_price: totalPrice,
+        status: 'awaiting_driver'
+      });
+
+      if (bookingError) throw bookingError;
+
+      // 2. Create Initial Notification
+      const { error: notifError } = await supabase.from('notifications').insert({
+        user_id: user.id,
+        type: 'system',
+        message: 'Your booking has been received. We will get back to you once we have a driver available for your trip.',
+        is_read: false
+      });
+
+      if (notifError) throw notifError;
+
+      setBookingConfirmed(true);
+      
+      // Redirect after a short delay
+      setTimeout(() => {
+        navigate('/dashboard');
+      }, 3000);
+
+    } catch (error) {
+      console.error('Booking failed:', error.message);
+      alert('Booking failed. Please check the console for details.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (bookingConfirmed) {
+    return (
+      <div className="booking-page celebration-view">
+        <motion.div 
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          className="confirmation-card glass-panel"
+        >
+          <CheckCircle size={64} color="var(--color-gold)" />
+          <h2>Booking Confirmed!</h2>
+          <p>We are matching you with an Elite chauffeur. Redirecting to your dashboard...</p>
+        </motion.div>
+      </div>
+    );
+  }
 
   return (
     <PageTransition>
       <div className="booking-page">
-      <div className="booking-layout">
-        
-        {/* Left/Top Area: Map Placeholder */}
-        <div className="map-view">
-          <div className="map-placeholder">
-            <div className="map-overlay">
-              <span className="map-text">Interactive Map View</span>
-              <p className="map-subtext">Route rendering placeholder</p>
-            </div>
-            {/* Draw a fake route line */}
-            <svg className="fake-route" viewBox="0 0 100 100" preserveAspectRatio="none">
-              <path d="M 20,80 Q 50,70 40,40 T 80,20" stroke="var(--color-gold)" strokeWidth="2" fill="none" strokeDasharray="5,5" />
-              <circle cx="20" cy="80" r="3" fill="var(--color-white)" />
-              <circle cx="80" cy="20" r="3" fill="var(--color-gold)" />
-            </svg>
-          </div>
-        </div>
-
-        {/* Right/Bottom Area: Booking Flow */}
-        <div className="booking-panel glass-panel">
+        <div className="booking-layout">
           
-          {step === 1 && (
-            <div className="booking-step slide-in">
-              <h2 className="panel-title">Schedule a Ride</h2>
-              <div className="form-group pickup-group">
-                <div className="input-wrapper">
-                  <Navigation className="input-icon" size={18} color="var(--color-white)" />
-                  <input type="text" placeholder="Pick-up Location" defaultValue="JFK International Airport" />
-                </div>
-                <div className="route-line"></div>
-                <div className="input-wrapper">
-                  <MapPin className="input-icon" size={18} color="var(--color-gold)" />
-                  <input type="text" placeholder="Drop-off Location" defaultValue="The Plaza Hotel, Manhattan" />
-                </div>
-              </div>
+          {/* Left Area: Map */}
+          <div className="map-panel">
+            <MapSimulation pickup={pickup} dropoff={dropoff} />
+          </div>
 
-              <div className="form-group">
-                <label>Date & Time (Min 2 hours advance)</label>
-                <div className="input-wrapper">
-                  <CalendarIcon className="input-icon" size={18} />
-                  <input type="datetime-local" />
+          {/* Right Area: Form */}
+          <div className="booking-form-panel">
+            <div className="booking-form-container">
+              <header className="form-header">
+                <h1 className="gold-text">Schedule a Ride</h1>
+                <p className="text-muted">Premium luxury chauffeur services tailored to you.</p>
+              </header>
+
+              <form className="luxury-booking-form" onSubmit={handleBooking}>
+                {/* Locations */}
+                <div className="location-inputs glass-panel">
+                  <div className="input-row">
+                    <Navigation size={18} className="gold-text" />
+                    <input 
+                      type="text" 
+                      placeholder="Pick-up Location" 
+                      value={pickup}
+                      onChange={(e) => setPickup(e.target.value)}
+                      required 
+                    />
+                  </div>
+                  <div className="route-divider" />
+                  <div className="input-row">
+                    <MapPin size={18} className="gold-text" />
+                    <input 
+                      type="text" 
+                      placeholder="Drop-off Location" 
+                      value={dropoff}
+                      onChange={(e) => setDropoff(e.target.value)}
+                      required 
+                    />
+                  </div>
                 </div>
-              </div>
 
-              <button className="btn-primary w-100 mt-lg" onClick={() => setStep(2)}>
-                Select Vehicle
-              </button>
-            </div>
-          )}
-
-          {step === 2 && (
-            <div className="booking-step slide-in">
-              <h2 className="panel-title">Select Vehicle</h2>
-              <div className="vehicle-list">
-                {vehicles.map(v => (
-                  <div 
-                    key={v.id} 
-                    className={`vehicle-card ${selectedVehicle === v.id ? 'selected' : ''}`}
-                    onClick={() => setSelectedVehicle(v.id)}
-                  >
-                    <div className="vehicle-img-mini">
-                      {v.name[0]}
-                    </div>
-                    <div className="vehicle-details">
-                      <h4>{v.name}</h4>
-                      <span className="capacity">{v.capacity} • {v.id.toUpperCase()}</span>
-                    </div>
-                    <div className="vehicle-price">
-                      ${v.price}
+                {/* Date & Time */}
+                <div className="form-grid mt-lg">
+                  <div className="form-group">
+                    <label>Date & Time</label>
+                    <div className="input-row glass-panel">
+                      <CalendarIcon size={18} className="gold-text" />
+                      <input 
+                        type="datetime-local" 
+                        value={date && time ? `${date}T${time}` : (date ? date : '')}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          if (val) {
+                            const [d, t] = val.split('T');
+                            setDate(d || '');
+                            setTime(t || '');
+                          }
+                        }}
+                        required 
+                      />
                     </div>
                   </div>
-                ))}
-              </div>
-              <div className="step-actions">
-                <button className="btn-secondary" onClick={() => setStep(1)}>Back</button>
+                </div>
+
+                {/* Service Type & Seats */}
+                <div className="form-grid mt-md">
+                  <div className="form-group">
+                    <label>Service Type</label>
+                    <select 
+                      className="luxury-select" 
+                      value={serviceType}
+                      onChange={(e) => setServiceType(e.target.value)}
+                    >
+                      <option value="medium">Medium Distance</option>
+                      <option value="long">Long Distance</option>
+                      <option value="multi">Multi-Location</option>
+                    </select>
+                  </div>
+                  <div className="form-group">
+                    <label>Passengers</label>
+                    <select 
+                      className="luxury-select" 
+                      value={seats}
+                      onChange={(e) => setSeats(Number(e.target.value))}
+                    >
+                      <option value="2">2 Seater</option>
+                      <option value="4">4 Seater</option>
+                      <option value="6">6 Seater</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Pricing Summary */}
+                <div className="pricing-summary glass-panel mt-lg">
+                  <div className="summary-row">
+                    <span>Base Fare ({serviceType.toUpperCase()})</span>
+                    <span>${getBasePrice()}</span>
+                  </div>
+                  <div className="summary-row">
+                    <span>Seat Premium ({seats} Pax)</span>
+                    <span>${getSeatModifier()}</span>
+                  </div>
+                  <div className="summary-row">
+                    <span>Distance ({distance} mi)</span>
+                    <span>${distance * 10}</span>
+                  </div>
+                  <div className="summary-total gold-text">
+                    <span>Total Estimated Price</span>
+                    <strong>${totalPrice}</strong>
+                  </div>
+                </div>
+
                 <button 
-                  className="btn-primary" 
-                  disabled={!selectedVehicle}
-                  onClick={() => setStep(3)}
+                  type="submit" 
+                  className="btn-primary w-100 mt-xl" 
+                  disabled={loading}
                 >
-                  Continuue <ChevronRight size={18} />
+                  {loading ? 'PROCESSING...' : 'REQUEST BOOKING'}
                 </button>
-              </div>
+              </form>
             </div>
-          )}
-
-          {step === 3 && (
-            <div className="booking-step slide-in">
-              <h2 className="panel-title">Review & Confirm</h2>
-              <div className="summary-card">
-                <div className="summary-row">
-                  <span>Pick-up</span>
-                  <strong>JFK Airport</strong>
-                </div>
-                <div className="summary-row">
-                  <span>Drop-off</span>
-                  <strong>The Plaza Hotel</strong>
-                </div>
-                <div className="summary-row">
-                  <span>Vehicle</span>
-                  <strong>{vehicles.find(v => v.id === selectedVehicle)?.name}</strong>
-                </div>
-                <div className="summary-divider"></div>
-                <div className="summary-row total-row">
-                  <span>Total (Fixed)</span>
-                  <strong className="gold-text">${vehicles.find(v => v.id === selectedVehicle)?.price}</strong>
-                </div>
-              </div>
-
-              <div className="payment-method">
-                <CreditCard size={20} color="var(--color-text-muted)" />
-                <span>•••• •••• •••• 4242</span>
-              </div>
-
-              <div className="step-actions mt-lg">
-                <button className="btn-secondary" onClick={() => setStep(2)}>Back</button>
-                <button className="btn-primary" onClick={() => alert('Booking Confirmed! (Dummy)')}>
-                  Confirm Ride
-                </button>
-              </div>
-            </div>
-          )}
+          </div>
 
         </div>
       </div>
-    </div>
     </PageTransition>
   );
 }
+
