@@ -113,8 +113,8 @@ export default function Booking() {
       <div className="booking-page">
         <div className="booking-layout">
           
-          {/* Left Area: Map */}
-          <div className="map-panel">
+          {/* Left Area: Map (Black/Gold) */}
+          <div className="map-panel-uber">
             <MapSimulation 
               onPickupChange={setPickup} 
               onDropoffChange={setDropoff}
@@ -122,19 +122,19 @@ export default function Booking() {
             />
           </div>
 
-          {/* Right Area: Form */}
+          {/* Right Area: Form (White/Black) */}
           <div className="booking-form-panel">
             <div className="booking-form-container">
               <header className="form-header">
-                <h1 className="gold-text">Schedule a Ride</h1>
+                <h1>Schedule a Ride</h1>
                 <p className="text-muted">Premium luxury chauffeur services tailored to you.</p>
               </header>
 
               <form className="luxury-booking-form" onSubmit={handleBooking}>
                 {/* Locations */}
-                <div className="location-inputs glass-panel">
-                  <div className="input-row">
-                    <Navigation size={18} className="gold-text" />
+                <div className="location-inputs-group">
+                  <div className="input-row-wrapper">
+                    <Navigation size={18} className="icon-black" />
                     <input 
                       type="text" 
                       placeholder="Pick-up Location" 
@@ -143,9 +143,8 @@ export default function Booking() {
                       required 
                     />
                   </div>
-                  <div className="route-divider" />
-                  <div className="input-row">
-                    <MapPin size={18} className="gold-text" />
+                  <div className="input-row-wrapper">
+                    <MapPin size={18} className="icon-black" />
                     <input 
                       type="text" 
                       placeholder="Drop-off Location" 
@@ -157,11 +156,11 @@ export default function Booking() {
                 </div>
 
                 {/* Date & Time */}
-                <div className="form-grid mt-lg">
-                  <div className="form-group">
-                    <label>Date & Time</label>
-                    <div className="input-row glass-panel">
-                      <CalendarIcon size={18} className="gold-text" />
+                <div className="form-grid-uber mt-lg">
+                  <div className="form-group-uber">
+                    <label>Pickup Date & Time</label>
+                    <div className="input-row-wrapper">
+                      <CalendarIcon size={18} className="icon-black" />
                       <input 
                         type="datetime-local" 
                         value={date && time ? `${date}T${time}` : (date ? date : '')}
@@ -180,11 +179,11 @@ export default function Booking() {
                 </div>
 
                 {/* Service Type & Seats */}
-                <div className="form-grid mt-md">
-                  <div className="form-group">
-                    <label>Service Type</label>
+                <div className="form-grid-uber mt-md">
+                  <div className="form-group-uber">
+                    <label>Elite Service</label>
                     <select 
-                      className="luxury-select" 
+                      className="uber-select" 
                       value={serviceType}
                       onChange={(e) => setServiceType(e.target.value)}
                     >
@@ -193,10 +192,10 @@ export default function Booking() {
                       <option value="multi">Multi-Location</option>
                     </select>
                   </div>
-                  <div className="form-group">
-                    <label>Passengers</label>
+                  <div className="form-group-uber">
+                    <label>Elite Seats</label>
                     <select 
-                      className="luxury-select" 
+                      className="uber-select" 
                       value={seats}
                       onChange={(e) => setSeats(Number(e.target.value))}
                     >
@@ -208,31 +207,27 @@ export default function Booking() {
                 </div>
 
                 {/* Pricing Summary */}
-                <div className="pricing-summary glass-panel mt-lg">
-                  <div className="summary-row">
-                    <span>Base Fare ({serviceType.toUpperCase()})</span>
+                <div className="uber-pricing mt-lg">
+                  <div className="uber-row">
+                    <span>Base Fare</span>
                     <span>${getBasePrice()}</span>
                   </div>
-                  <div className="summary-row">
-                    <span>Seat Premium ({seats} Pax)</span>
-                    <span>${getSeatModifier()}</span>
-                  </div>
-                  <div className="summary-row">
+                  <div className="uber-row">
                     <span>Distance ({distance} mi)</span>
                     <span>${distance * 10}</span>
                   </div>
-                  <div className="summary-total gold-text">
-                    <span>Total Estimated Price</span>
+                  <div className="uber-total">
+                    <span>Estimate</span>
                     <strong>${totalPrice}</strong>
                   </div>
                 </div>
 
                 <button 
                   type="submit" 
-                  className="btn-primary w-100 mt-xl" 
+                  className="btn-uber-request w-100 mt-xl" 
                   disabled={loading}
                 >
-                  {loading ? 'PROCESSING...' : 'REQUEST BOOKING'}
+                  {loading ? 'REQUESTING...' : 'Search'}
                 </button>
               </form>
             </div>

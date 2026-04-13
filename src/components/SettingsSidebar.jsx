@@ -7,8 +7,27 @@ export default function SettingsSidebar({
   isOpen, 
   onClose, 
   user, 
-  onSignOut 
+  onSignOut,
+  onAvatarChange,
+  avatarUrl
 }) {
+  const fileInputRef = React.useRef(null);
+
+  const handleAvatarClick = () => {
+    fileInputRef.current.click();
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        onAvatarChange(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const menuItems = [
     { icon: <User size={20} />, label: 'Profile Settings', sub: 'Manage your personal info' },
     { icon: <CreditCard size={20} />, label: 'Payment Methods', sub: 'Cards and billing' },
@@ -35,8 +54,24 @@ export default function SettingsSidebar({
             </div>
 
             <div className="sidebar-user-block">
-              <div className="user-avatar-large">
-                <User size={32} />
+              <div 
+                className="user-avatar-large" 
+                onClick={handleAvatarClick}
+                style={{ cursor: 'pointer', overflow: 'hidden' }}
+                title="Click to change profile picture"
+              >
+                {avatarUrl ? (
+                  <img src={avatarUrl} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                ) : (
+                  <User size={32} />
+                )}
+                <input 
+                  type="file" 
+                  ref={fileInputRef} 
+                  style={{ display: 'none' }} 
+                  accept="image/*"
+                  onChange={handleFileChange}
+                />
               </div>
               <div className="user-info">
                 <h3>{user?.email?.split('@')[0] || 'Member'}</h3>

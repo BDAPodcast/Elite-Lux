@@ -13,10 +13,44 @@ export default function Layout({ session }) {
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
+  const [avatarUrl, setAvatarUrl] = useState(null);
   
   const location = useLocation();
   const navigate = useNavigate();
   const isAppPage = ['/dashboard', '/booking'].includes(location.pathname);
+
+  // Realtime Subscription
+  useEffect(() => {
+    if (session) {
+      // 1. Initial Fetch
+      const fetchNotifications = async () => {
+        const { data } = await supabase
+          .from('notifications')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(15);
+        if (data) setNotifications(data);
+      };
+      
+      fetchNotifications();
+
+      // 2. Realtime Channel
+      const channel = supabase
+        .channel('schema-db-changes')
+        .on(
+          'postgres_changes',
+          { event: 'INSERT', schema: 'public', table: 'notifications', filter: `user_id=eq.${session.user.id}` },
+          (payload) => {
+            setNotifications(prev => [payload.new, ...prev].slice(0, 15));
+          }
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
+    }
+  }, [session]);
 
   // Close menus on route change
   useEffect(() => {
@@ -24,21 +58,6 @@ export default function Layout({ session }) {
     setIsNotificationsOpen(false);
     setIsSettingsOpen(false);
   }, [location.pathname]);
-
-  // Fetch notifications
-  useEffect(() => {
-    if (session) {
-      const fetchNotifications = async () => {
-        const { data, error } = await supabase
-          .from('notifications')
-          .select('*')
-          .order('created_at', { ascending: false })
-          .limit(15);
-        if (data) setNotifications(data);
-      };
-      fetchNotifications();
-    }
-  }, [session]);
 
   const closeMenu = () => setMobileMenuOpen(false);
 
@@ -64,7 +83,7 @@ export default function Layout({ session }) {
           onOpenNotifications={() => setIsNotificationsOpen(true)}
           onOpenSettings={() => setIsSettingsOpen(true)}
           hasNewNotifications={hasUnread}
-          userAvatar={null} // To be implemented with profile logic
+          userAvatar={avatarUrl}
         />
       ) : (
         <nav className="header-nav">
@@ -117,6 +136,8 @@ export default function Layout({ session }) {
         onClose={() => setIsSettingsOpen(false)}
         user={session?.user}
         onSignOut={handleSignOut}
+        onAvatarChange={setAvatarUrl}
+        avatarUrl={avatarUrl}
       />
 
       {/* Mobile Menu Dropdown */}

@@ -1,151 +1,194 @@
 .booking-page {
   min-height: calc(100vh - 64px);
-  background-color: var(--color-black);
-  display: flex;
+  background-color: #000000; /* Black so map side has no white bleed */
   margin-top: 64px;
 }
 
 .booking-layout {
   display: flex;
-  width: 100%;
   flex-direction: column;
+  width: 100%;
+  min-height: calc(100vh - 64px);
+  background-color: #000000;
 }
 
 @media (min-width: 1024px) {
   .booking-layout {
     flex-direction: row;
-  }
-}
-
-/* Left Panel: Map */
-.map-panel {
-  flex: 1.2;
-  height: 40vh;
-  position: sticky;
-  top: 64px;
-  border-right: 0.5px solid rgba(198, 168, 124, 0.1);
-}
-
-@media (min-width: 1024px) {
-  .map-panel {
     height: calc(100vh - 64px);
   }
 }
 
-/* Right Panel: Form */
+/* Map Panel (Left on Desktop, Bottom on Mobile) */
+.map-panel-uber {
+  flex: 0.65;
+  background-color: #000000;
+  position: relative;
+  border: 4px solid #c6a87c; /* Gold Border */
+  margin: 20px;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+/* Form Panel (Right on Desktop, Top on Mobile) */
 .booking-form-panel {
-  flex: 0.8;
-  padding: var(--spacing-xl) 5vw;
-  background-color: var(--color-black);
+  flex: 0.35;
+  padding: 40px;
+  background-color: #ffffff;
+  border-left: 1px solid #000000;
   overflow-y: auto;
+  z-index: 10;
+  color: #000000;
 }
 
 .booking-form-container {
-  max-width: 500px;
+  max-width: 400px;
   margin: 0 auto;
 }
 
 .form-header h1 {
   font-size: 2.2rem;
-  margin-bottom: 8px;
+  font-weight: 800;
+  margin-bottom: 5px;
+  color: #000000;
 }
 
 .text-muted {
-  color: var(--color-text-muted);
-  font-size: 0.95rem;
-  margin-bottom: var(--spacing-xl);
+  color: #666666;
+  font-size: 0.9rem;
+  margin-bottom: 30px;
 }
 
-.location-inputs {
-  padding: var(--spacing-lg);
+/* Uber-style locations */
+.location-inputs-group {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  background-color: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  margin-bottom: 25px;
+  position: relative;
 }
 
-.input-row {
+.input-row-wrapper {
   display: flex;
   align-items: center;
-  gap: var(--spacing-md);
-  padding: 8px 12px;
-  border-radius: var(--border-radius-sm);
+  gap: 15px;
+  padding: 12px 15px;
+  background-color: #ffffff; /* White background for content boxes */
+  border: 1.5px solid #000000; /* Black border */
+  border-radius: 10px;
+  transition: all 0.2s ease;
 }
 
-.input-row input, .luxury-select {
+.input-row-wrapper:focus-within {
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
+  background-color: #fcfcfc;
+}
+
+.input-row-wrapper input {
   flex: 1;
   background: transparent;
   border: none;
-  color: var(--color-white);
   outline: none;
   font-size: 1rem;
-  width: 100%;
+  color: #000000; /* Black characters */
+  font-weight: 600;
 }
 
-.luxury-select {
-  background-color: rgba(255, 255, 255, 0.05);
-  padding: 12px;
-  border-radius: var(--border-radius-sm);
-  cursor: pointer;
-  appearance: none;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: var(--color-white);
+.input-row-wrapper input::placeholder {
+  color: #999999;
 }
 
-.luxury-select option {
-  background-color: var(--color-black);
-  color: var(--color-white);
-  padding: 10px;
+.icon-black {
+  color: #000000;
 }
 
-.route-divider {
-  height: 1px;
-  background: rgba(255, 255, 255, 0.1);
-  margin-left: 34px;
-}
-
-.form-grid {
+/* Form Grid */
+.form-grid-uber {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--spacing-md);
+  grid-template-columns: 1fr;
+  gap: 15px;
 }
 
-.form-group label {
+.form-group-uber label {
   display: block;
   font-size: 0.75rem;
-  font-weight: 700;
-  color: var(--color-gold);
+  font-weight: 800;
+  color: #000000;
   margin-bottom: 8px;
   text-transform: uppercase;
-  letter-spacing: 1.5px;
+  letter-spacing: 0.5px;
 }
 
-.pricing-summary {
-  padding: var(--spacing-lg);
+.uber-select {
+  width: 100%;
+  padding: 12px 15px;
+  background-color: #ffffff;
+  border: 1.5px solid #000000;
+  border-radius: 10px;
+  font-size: 1rem;
+  color: #000000;
+  font-weight: 600;
+  cursor: pointer;
+  appearance: none;
+}
+
+.uber-select:focus {
+  outline: none;
+  background-color: #fcfcfc;
+}
+
+/* Pricing Summary */
+.uber-pricing {
+  border-top: 2px solid #000000;
+  padding-top: 25px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  background-color: rgba(198, 168, 124, 0.03);
-  border: 1px solid rgba(198, 168, 124, 0.1);
+  gap: 15px;
 }
 
-.summary-row {
+.uber-row {
   display: flex;
   justify-content: space-between;
-  font-size: 0.9rem;
-  color: var(--color-text-muted);
+  color: #000000;
+  font-size: 1rem;
+  font-weight: 500;
 }
 
-.summary-total {
-  margin-top: 12px;
-  padding-top: 12px;
-  border-top: 1px solid rgba(198, 168, 124, 0.3);
+.uber-total {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 1.15rem;
-  font-weight: 700;
+  margin-top: 5px;
+  padding-top: 15px;
+  border-top: 1px solid #eeeeee;
+  font-size: 1.35rem;
+  font-weight: 900;
+  color: #000000;
+}
+
+/* Request Button */
+.btn-uber-request {
+  background-color: #000000;
+  color: #ffffff;
+  border: 2px solid #000000;
+  padding: 18px;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.btn-uber-request:hover {
+  background-color: #ffffff;
+  color: #000000;
+}
+
+.btn-uber-request:active {
+  transform: scale(0.98);
 }
 
 /* Celebration View */
@@ -156,31 +199,62 @@
   align-items: center;
   padding: 5vw;
   text-align: center;
-  background-color: var(--color-black);
+  background-color: #000000;
 }
 
 .confirmation-card {
-  padding: var(--spacing-xxl);
+  padding: 60px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--spacing-lg);
+  gap: 20px;
   max-width: 500px;
-  border: 1px solid var(--color-gold);
+  border: 2px solid #c6a87c;
+  background: #ffffff;
+  color: #000000;
+  border-radius: 20px;
 }
 
 .confirmation-card h2 {
   font-size: 2.2rem;
-  color: var(--color-gold);
+  color: #000000;
 }
 
 .confirmation-card p {
-  color: var(--color-text-muted);
+  color: #666666;
   line-height: 1.6;
 }
 
+/* Mobile Media Queries */
+@media (max-width: 1023px) {
+  .booking-page {
+    background-color: #000000; /* Keep black — form panel provides its own white bg */
+    margin-top: 56px;
+  }
+  
+  .booking-layout {
+    flex-direction: column-reverse; /* Form on top, Map on bottom */
+    height: auto;
+  }
+  
+  .booking-form-panel {
+    border-left: none;
+    border-bottom: 2px solid #000000;
+    padding: 30px 20px;
+  }
+  
+  .map-panel-uber {
+    height: 450px;
+    margin: 15px;
+    flex: none;
+  }
+
+  .form-header h1 {
+    font-size: 1.8rem;
+  }
+}
+
 .w-100 { width: 100%; }
-.mt-md { margin-top: var(--spacing-md); }
-.mt-lg { margin-top: var(--spacing-lg); }
-.mt-xl { margin-top: var(--spacing-xl); }
-.gold-text { color: var(--color-gold); }
+.mt-md { margin-top: 15px; }
+.mt-lg { margin-top: 25px; }
+.mt-xl { margin-top: 40px; }

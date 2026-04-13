@@ -1,0 +1,6 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Inter', sans-serif; background: #0a0a0a; color: #ffffff; min-height: 100vh; }
+:root { --gold: #c6a87c; --black: #000000; --white: #ffffff; --gray: #111111; --border: #222222; }
+button { font-family: inherit; cursor: pointer; }
+input, select, textarea { font-family: inherit; }
+a { text-decoration: none; color: inherit; }

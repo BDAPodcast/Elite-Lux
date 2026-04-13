@@ -18,8 +18,8 @@ function AnimatedRoutes({ session }) {
         <Route path="/" element={<Layout session={session} />}>
           <Route index element={session ? <Navigate to="/dashboard" replace /> : <Landing />} />
           <Route path="login" element={!session ? <Login /> : <Navigate to="/dashboard" replace />} />
-          <Route path="booking" element={session ? <Booking /> : <Navigate to="/login" replace />} />
-          <Route path="dashboard" element={session ? <Dashboard /> : <Navigate to="/login" replace />} />
+          <Route path="booking" element={session ? <Booking /> : <Navigate to="/" replace />} />
+          <Route path="dashboard" element={session ? <Dashboard /> : <Navigate to="/" replace />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
       </Routes>
